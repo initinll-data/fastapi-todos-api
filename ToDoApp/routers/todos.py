@@ -50,6 +50,8 @@ async def read_all(user: user_dependency, db: db_dependency):
                 status_code=status.HTTP_404_NOT_FOUND, detail="not found")
 
         return todos
+    except HTTPException:
+        raise
     except Exception as e:
         error = f"An exception of type {
             type(e).__name__} occurred. Details: {str(e)}"
@@ -69,11 +71,13 @@ async def read_todo(user: user_dependency, db: db_dependency, todo_id: int = Pat
             .filter(Todos.owner_id == user.user_id) \
             .first()
 
-        if todo_model is not None:
-            return todo_model
+        if todo_model is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="todo not found")
 
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="todo not found")
+        return todo_model
+    except HTTPException:
+        raise
     except Exception as e:
         error = f"An exception of type {
             type(e).__name__} occurred. Details: {str(e)}"
@@ -91,6 +95,8 @@ async def create_todo(user: user_dependency, db: db_dependency, todo_request: To
                            owner_id=user.user_id)
         db.add(todo_model)
         db.commit()
+    except HTTPException:
+        raise
     except Exception as e:
         error = f"An exception of type {
             type(e).__name__} occurred. Details: {str(e)}"
@@ -121,6 +127,8 @@ async def update_todo(user: user_dependency, db: db_dependency, todo_request: To
 
         db.add(todo_model)
         db.commit()
+    except HTTPException:
+        raise
     except Exception as e:
         error = f"An exception of type {
             type(e).__name__} occurred. Details: {str(e)}"
@@ -146,6 +154,8 @@ async def delete_todo(user: user_dependency, db: db_dependency, todo_id: int = P
 
         db.delete(todo_model)
         db.commit()
+    except HTTPException:
+        raise
     except Exception as e:
         error = f"An exception of type {
             type(e).__name__} occurred. Details: {str(e)}"
