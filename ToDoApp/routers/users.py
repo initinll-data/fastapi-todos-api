@@ -35,7 +35,7 @@ class UserVerification(BaseModel):
     new_password: str = Field(min_length=6)
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/user", status_code=status.HTTP_200_OK)
 async def get_user(user: user_dependency, db: db_dependency):
     try:
         if user is None:
@@ -49,6 +49,8 @@ async def get_user(user: user_dependency, db: db_dependency):
                 status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
 
         return user_info
+    except HTTPException:
+        raise
     except Exception as e:
         error = f"An exception of type {
             type(e).__name__} occurred. Details: {str(e)}"
@@ -77,7 +79,8 @@ async def change_password(user: user_dependency, db: db_dependency, user_verific
             user_verification.new_password)
         db.add(user_model)
         db.commit()
-
+    except HTTPException:
+        raise
     except Exception as e:
         error = f"An exception of type {
             type(e).__name__} occurred. Details: {str(e)}"
